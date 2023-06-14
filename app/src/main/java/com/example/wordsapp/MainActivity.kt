@@ -17,6 +17,9 @@ package com.example.wordsapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuHost
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -25,9 +28,10 @@ import com.example.wordsapp.databinding.ActivityMainBinding
 /**
  * Main Activity and entry point for the app.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MenuHost {
 
     private lateinit var navController: NavController
+    private lateinit var letListFrag: LetterListFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,18 +40,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Get the navigation host fragment from this Activity
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         // Instantiate the navController using the NavHostFragment
         navController = navHostFragment.navController
         // Make sure actions in the ActionBar get propagated to the NavController
         setupActionBarWithNavController(navController)
+
+        letListFrag = findViewById(R.id.letterListFragment)
+
+        this.addMenuProvider(, this)
     }
 
     /**
      * Enables back button support. Simply navigates one element up on the stack.
      */
-    override fun onSupportNavigateUp(): Boolean {
+    /*override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
-    }
+    }*/
 }

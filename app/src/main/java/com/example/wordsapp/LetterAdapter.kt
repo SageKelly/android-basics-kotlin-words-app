@@ -15,6 +15,7 @@
  */
 package com.example.wordsapp
 
+import android.content.Intent
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -38,12 +39,10 @@ class LetterAdapter :
      * Provides a reference for the views needed to display items in your list.
      */
     class LetterViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val button = view.findViewById<Button>(R.id.button_item)
+        val button: Button = view.findViewById(R.id.button_item)
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
     /**
      * Creates new views with R.layout.item_view as its template
@@ -67,9 +66,12 @@ class LetterAdapter :
 
         // Assigns a [OnClickListener] to the button contained in the [ViewHolder]
         holder.button.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, DetailActivity::class.java)
             // Create an action from WordList to DetailList
             // using the required arguments
-            val action = LetterListFragmentDirections.actionLetterListFragmentToWordListFragment(letter = holder.button.text.toString())
+            val action =
+                LetterListFragmentDirections.actionLetterListFragmentToWordListFragment(letter = holder.button.text.toString())
             // Navigate using that action
             holder.view.findNavController().navigate(action)
         }

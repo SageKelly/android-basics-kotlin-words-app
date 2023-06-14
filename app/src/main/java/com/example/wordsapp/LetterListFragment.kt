@@ -23,7 +23,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +35,7 @@ import com.example.wordsapp.databinding.FragmentLetterListBinding
 /**
  * Entry fragment for the app. Displays a [RecyclerView] of letters.
  */
-class LetterListFragment : Fragment() {
+class LetterListFragment : Fragment(), MenuProvider {
     private var _binding: FragmentLetterListBinding? = null
 
     // This property is only valid between onCreateView and
@@ -40,6 +43,7 @@ class LetterListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var recyclerView: RecyclerView
+
     // Keeps track of which LayoutManager is in use for the [RecyclerView]
     private var isLinearLayoutManager = true
 
@@ -49,10 +53,10 @@ class LetterListFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         // Retrieve and inflate the layout for this fragment
         _binding = FragmentLetterListBinding.inflate(inflater, container, false)
         val view = binding.root
@@ -74,7 +78,7 @@ class LetterListFragment : Fragment() {
         _binding = null
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.layout_menu, menu)
 
         val layoutButton = menu.findItem(R.id.action_switch_layout)
@@ -97,35 +101,40 @@ class LetterListFragment : Fragment() {
     }
 
     private fun setIcon(menuItem: MenuItem?) {
-        if (menuItem == null)
-            return
+        if (menuItem == null) return
 
-        menuItem.icon =
-            if (isLinearLayoutManager)
-                ContextCompat.getDrawable(this.requireContext(), R.drawable.ic_grid_layout)
-            else ContextCompat.getDrawable(this.requireContext(), R.drawable.ic_linear_layout)
+        menuItem.icon = if (isLinearLayoutManager) ContextCompat.getDrawable(
+            this.requireContext(), R.drawable.ic_grid_layout
+        )
+        else ContextCompat.getDrawable(this.requireContext(), R.drawable.ic_linear_layout)
     }
 
     /**
      * Determines how to handle interactions with the selected [MenuItem]
      */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onMenuItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_switch_layout -> {
-                // Sets isLinearLayoutManager (a Boolean) to the opposite value
-                isLinearLayoutManager = !isLinearLayoutManager
-                // Sets layout and icon
-                chooseLayout()
-                setIcon(item)
-
+                changeMenuLayout(item)
                 return true
             }
-            // Otherwise, do nothing and use the core event handling
-
-            // when clauses require that all possible paths be accounted for explicitly,
-            // for instance both the true and false cases if the value is a Boolean,
-            // or an else to catch all unhandled cases.
-            else -> super.onOptionsItemSelected(item)
+            /* Otherwise, do nothing and use the core event handling
+             when clauses require that all possible paths be accounted for explicitly,
+             for instance both the true and false cases if the value is a Boolean,
+             or an else to catch all unhandled cases.
+            */
+            else -> {
+                changeMenuLayout(item)
+                return true
+            }
         }
+    }
+
+    private fun changeMenuLayout(item: MenuItem) {
+        // Sets isLinearLayoutManager (a Boolean) to the opposite value
+        isLinearLayoutManager = !isLinearLayoutManager
+        // Sets layout and icon
+        chooseLayout()
+        setIcon(item)
     }
 }
